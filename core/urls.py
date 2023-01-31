@@ -1,14 +1,10 @@
 from django.urls import path
 from .views import *
-from django.conf import settings
-from django.conf.urls.static import static
-
-
 
 app_name = 'core'
 urlpatterns = [
     path('', HomeView.as_view(), name='home'),
-    # path('items/', AllItemAPIView.as_view(), name='items'),
+    path('items/<str:filter>', ItemView.as_view(), name='filter'),
 
     path('checkout/', CheckoutView.as_view(), name='checkout'),
     path('product/<slug>/', ItemDetailView.as_view(), name='product'),
@@ -16,5 +12,5 @@ urlpatterns = [
     path('add-to-cart/<slug>/', add_to_cart, name='add-to-cart'),
     path('remove-from-cart/<slug>/', remove_from_cart, name='remove-from-cart'),
     path('remove-item-from-cart/<slug>/', remove_single_item_from_cart, name='remove-single-item-from-cart'),
-    path('payment/<payment_option>/', PaymentView.as_view(), name='payment')
-] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+    # path('payment/', PaymentView.as_view(), name='payment')
+]

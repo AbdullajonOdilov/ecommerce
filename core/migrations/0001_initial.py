@@ -7,7 +7,6 @@ import django_countries.fields
 
 
 class Migration(migrations.Migration):
-
     initial = True
 
     dependencies = [
@@ -33,8 +32,12 @@ class Migration(migrations.Migration):
                 ('title', models.CharField(max_length=100)),
                 ('discount_price', models.FloatField(blank=True, null=True)),
                 ('price', models.FloatField()),
-                ('category', models.CharField(choices=[('S', 'Shirt'), ('SW', 'Sport wear'), ('OW', 'Outwear')], max_length=2, null=True)),
-                ('label', models.CharField(choices=[('P', 'primary'), ('S', 'secondary'), ('D', 'danger')], max_length=1, null=True)),
+                ('category',
+                 models.CharField(choices=[('S', 'Shirt'), ('SW', 'Sport wear'), ('OW', 'Outwear')], max_length=2,
+                                  null=True)),
+                ('label',
+                 models.CharField(choices=[('P', 'primary'), ('S', 'secondary'), ('D', 'danger')], max_length=1,
+                                  null=True)),
                 ('image', models.FileField(blank=True, null=True, upload_to='images')),
                 ('slug', models.SlugField()),
                 ('description', models.TextField(blank=True, null=True)),
@@ -57,7 +60,9 @@ class Migration(migrations.Migration):
                 ('start_date', models.DateTimeField(auto_now_add=True)),
                 ('ordered_date', models.DateTimeField()),
                 ('ordered', models.BooleanField(default=False)),
-                ('billing_address', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to='core.billingaddress')),
+                ('billing_address',
+                 models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL,
+                                   to='core.billingaddress')),
                 ('items', models.ManyToManyField(to='core.orderitem')),
                 ('user', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL)),
             ],

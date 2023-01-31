@@ -1,29 +1,35 @@
- <!DOCTYPE html>
+<!DOCTYPE html>
 <html>
-  <head>
+{% load static %}
+<head>
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block head_title %}{% endblock %}</title>
+        <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.8.1/css/all.css">
+    <link href="{% static 'css/bootstrap.min.css' %}" rel="stylesheet">
+    <link href="{% static 'css/mdb.min.css' %}" rel="stylesheet">
+    <link href="{% static 'css/style.min.css' %}" rel="stylesheet">
+    <style type="text/css">
     {% block extra_head %}
     {% endblock %}
-  </head>
-  <body>
-    {% block body %}
+</head>
+<body>
+{% block body %}
 
-    {% if messages %}
-    <div>
-      <strong>Messages:</strong>
-      <ul>
+{% if messages %}
+<div>
+    <strong>Messages:</strong>
+    <ul>
         {% for message in messages %}
         <li>{{message}}</li>
         {% endfor %}
-      </ul>
-    </div>
-    {% endif %}
+    </ul>
+</div>
+{% endif %}
 
-    <div>
-      <strong>Menu:</strong>
-      <ul>
+<div>
+    <strong>Menu:</strong>
+    <ul>
         {% if user.is_authenticated %}
         <li><a href="{% url 'account_email' %}">Change E-mail</a></li>
         <li><a href="{% url 'account_logout' %}">Sign Out</a></li>
@@ -31,12 +37,12 @@
         <li><a href="{% url 'account_login' %}">Sign In</a></li>
         <li><a href="{% url 'account_signup' %}">Sign Up</a></li>
         {% endif %}
-      </ul>
-    </div>
-    {% block content %}
-    {% endblock %}
-    {% endblock %}
-    {% block extra_body %}
-    {% endblock %}
-  </body>
+    </ul>
+</div>
+{% block content %}
+{% endblock %}
+{% endblock %}
+{% block extra_body %}
+{% endblock %}
+</body>
 </html>

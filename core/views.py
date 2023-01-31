@@ -11,8 +11,6 @@ from .forms import CheckoutForm
 from rest_framework import filters
 from .models import *
 
-
-
 # get
 from .serializers import ItemSerializer
 
@@ -23,33 +21,40 @@ def products(request):
     }
     return render(request, 'product.html', context)
 
+
 class CheckoutView(View):
     def get(self, *args, **kwargs):
         form = CheckoutForm()
+        # total = Order.get_total(self)
         context = {
-            'form': form
+            'form': form,
+            # 'total': total
         }
         return render(self.request, 'checkout.html', context)
 
     def post(self, *args, **kwargs):
         form = CheckoutForm(self.request.POST or None)
         try:
-            order = Order.objects.get(user=self.request.user,  ordered=False)
+            order = Order.objects.get(user=self.request.user, ordered=False)
             if form.is_valid():
                 street_address = form.cleaned_data.get('street_address')
                 apartment_address = form.cleaned_data.get('apartment_address')
                 country = form.cleaned_data.get('country')
+                # region = form.cleaned_data.get('region')
                 zip = form.cleaned_data.get('zip')
+                image = form.cleaned_data.get('image')
                 # TODO: add functionality for these fields
                 # same_shipping_address = form.cleaned_data.get('same_shipping_address')
                 # save_info = form.cleaned_data.get('save_info')
-                payment_option = form.cleaned_data.get('payment_option')
+                # payment_option = form.cleaned_data.get('payment_option')
                 billing_address = BillingAddress(
                     user=self.request.user,
                     street_address=street_address,
                     apartment_address=apartment_address,
                     country=country,
-                    zip=zip
+                    # region=region,
+                    zip=zip,
+                    image=image
                 )
                 billing_address.save()
                 order.billing_address = billing_address
@@ -63,39 +68,52 @@ class CheckoutView(View):
             messages.error(self.request, "You do not have an active order")
             return redirect("core:order-summary")
 
-class PaymentView(View):
-    def get(self, *args, **kwargs):
-        return render(self.request, 'payment.html')
+
+# class PaymentView(View):
+#     def get(self, *args, **kwargs):
+#         total = Order.get_total()
+#         context = {
+#             'total': total
+#         }
+#         return render(self.request, 'payment.html', context)
 
 
-class HomeView(ListView):
-    model = Item
+class HomeView(View):
     paginate_by = 8
-    template_name = "home.html"
-# class AllItemAPIView(APIView):
-#     filter_backends = [filters.SearchFilter]
-#     search_fields = ['title','category', 'description']
-#     def get(self, request):
-#         soz = request.query_params.get('k')
-#         if soz is None:
-#             items = Item.objects.all()
-#         else:
-#             items = Item.objects.filter(
-#                 title__contains=soz)|Item.objects.filter(
-#                 title__category=soz)|Item.objects.filter(
-#                 title__description=soz
-#             )
-#         ser = ItemSerializer(items, many=True)
-#         return Response(ser.data)
+
+    # filter_backends = [filters.SearchFilter]
+    # search_fields = ['title','category', 'description']
+    def get(self, request):
+        soz = request.GET.get('search')
+        if soz is None:
+            items = Item.objects.all()
+        else:
+            items = Item.objects.filter(
+                title__contains=soz) | Item.objects.filter(
+                category__contains=soz) | Item.objects.filter(
+                description__contains=soz
+            )
+        context = {
+            'object_list': items,
+        }
+        return render(request, 'home.html', context)
 
 
+class ItemView(View):
+    def get(self, request, filter):
+        items = Item.objects.filter(category=filter)
 
+        context = {
+
+            'object_list': items
+        }
+        return render(request, 'home.html', context)
 
 
 class OrderSummaryView(LoginRequiredMixin, View):
     def get(self, *args, **kwargs):
         try:
-            order = Order.objects.get(user=self.request.user,  ordered=False)
+            order = Order.objects.get(user=self.request.user, ordered=False)
             context = {
                 'object': order
             }
@@ -108,6 +126,7 @@ class OrderSummaryView(LoginRequiredMixin, View):
 class ItemDetailView(DetailView):
     model = Item
     template_name = "product.html"
+
 
 @login_required
 def add_to_cart(request, slug):
@@ -138,6 +157,8 @@ def add_to_cart(request, slug):
         messages.info(request, "This item was added to your card")
 
         return redirect("core:product")
+
+
 @login_required
 def remove_from_cart(request, slug):
     item = get_object_or_404(Item, slug=slug)
@@ -194,5 +215,3 @@ def remove_single_item_from_cart(request, slug):
         # add a message saying the user does not have an order
         messages.info(request, "You do not have an active order")
         return redirect("core:product", slug=slug)
-
-

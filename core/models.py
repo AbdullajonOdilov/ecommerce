@@ -5,21 +5,26 @@ from django.db.models import Sum
 from django.urls import reverse
 
 CATEGORY_CHOICES = (
-    ('S','Shirt'),
-    ('SW','Sport wear'),
-    ('OW','Outwear')
+    ('S', 'Smartphones'),
+    ('SW', 'Smart watches'),
+    ('L', 'Laptops'),
+    ('A', 'Accessories'),
+    ('T', 'Toys'),
 )
 LABEL_CHOICES = (
-    ('P','primary'),
-    ('S','secondary'),
-    ('D','danger')
+    ('P', 'primary'),
+    ('S', 'secondary'),
+    ('D', 'danger')
 )
+
+
 class Item(models.Model):
     title = models.CharField(max_length=100)
+    brand = models.CharField(max_length=30, null=True, blank=True)
     discount_price = models.FloatField(blank=True, null=True)
     price = models.FloatField()
-    category = models.CharField(choices=CATEGORY_CHOICES,max_length=2, null=True)
-    label = models.CharField(choices=LABEL_CHOICES,max_length=1, null=True)
+    category = models.CharField(choices=CATEGORY_CHOICES, max_length=2, null=True)
+    label = models.CharField(choices=LABEL_CHOICES, max_length=1, null=True)
     image = models.FileField(blank=True, null=True, upload_to='images')
     slug = models.SlugField()
     description = models.TextField(blank=True, null=True)
@@ -29,28 +34,32 @@ class Item(models.Model):
 
     def get_absolute_url(self):
         return reverse("core:product", kwargs={
-            'slug':self.slug
+            'slug': self.slug
         })
 
     def get_add_to_cart_url(self):
         return reverse("core:add-to-cart", kwargs={
             'slug': self.slug
         })
+
     def remove_from_cart_url(self):
         return reverse("core:remove-from-cart", kwargs={
             'slug': self.slug
         })
 
+
 class OrderItem(models.Model):
-    user = models.ForeignKey(settings.AUTH_USER_MODEL,on_delete=models.CASCADE)
-    ordered = models.BooleanField(default=False )
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    ordered = models.BooleanField(default=False)
     item = models.ForeignKey(Item, on_delete=models.CASCADE)
     quantity = models.IntegerField(default=1)
 
     def __str__(self):
         return f"{self.quantity} of {self.item.title}"
+
     def get_total_item_price(self):
         return self.quantity * self.item.price
+
     def get_total_discount_item_price(self):
         return self.quantity * self.item.discount_price
 
@@ -62,6 +71,7 @@ class OrderItem(models.Model):
             return self.get_total_discount_item_price()
         return self.get_total_item_price()
 
+
 class Order(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     items = models.ManyToManyField(OrderItem)
@@ -69,8 +79,9 @@ class Order(models.Model):
     ordered_date = models.DateTimeField()
     ordered = models.BooleanField(default=False)
     billing_address = models.ForeignKey("BillingAddress", on_delete=models.SET_NULL, blank=True, null=True)
-    def __str__(self):
-        return self.title
+
+    # def __str__(self):
+    #     return f"{self.item.title}"
 
     def get_total(self):
         total = 0
@@ -87,5 +98,3 @@ class BillingAddress(models.Model):
     zip = models.CharField(max_length=100)
 
     def __str__(self): return self.user.username
-
-
